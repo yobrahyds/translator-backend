@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import google.generativeai as genai
 import os
 import re
@@ -9,6 +10,7 @@ DetectorFactory.seed = 0
 
 # Flask setup
 app = Flask(__name__)
+CORS(app)  # 🚨 This enables cross-origin access from your HTML page
 
 # Gemini API key (set in Render dashboard as environment variable)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -68,10 +70,7 @@ def translate():
 
     user_text = data['text']
     try:
-        # Call Gemini
         raw_output = translate_shembeteng(user_text)
-
-        # Extract the final Shembeteng translation from Gemini's response
         match = re.search(r'Final Shembeteng Translation:\s*\*\*([^\*]+)\*\*', raw_output)
         translation = match.group(1).strip() if match else "Translation not found."
 
