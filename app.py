@@ -8,83 +8,54 @@ from langdetect import detect, DetectorFactory
 # Ensure consistent language detection
 DetectorFactory.seed = 0
 
+# Flask setup
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # 🚨 This enables cross-origin access from your HTML page
 
-# Configure Gemini API
+# Gemini API key (set in Render dashboard as environment variable)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 
+# Define Gemini model
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# 🧠 FULL Shembeteng Rule Prompt
+# Shembeteng core prompt
 shembeteng_prompt = """
 ***STRICT ADHERENCE PROTOCOL: SHEMBETENG LANGUAGE ENGINE***
 
-PRIMARY DIRECTIVE: Use all 59 Shembeteng rules exactly. NEVER deviate. If unsure, Shembetengify by flow.
+**PRIMARY DIRECTIVE:** Translate input using 59 Shembeteng rules with total accuracy. NEVER deviate.
 
---- INSERT FORMULA ---
-a → ambata
-e → embete
-i → imbiti
-o → omboto
-u → umbutu
+**KEY RULES:**
 
---- PHONETIC EMPHASIS (PE) ---
-Insert pattern at PE point (last vowel for French; stress for others).
-DO NOT remove original letters. Maintain original root structure.
+I. INSERT FORMULA:
+  * a → ambata
+  * e → embete
+  * i → imbiti
+  * o → omboto
+  * u → umbutu
 
---- FOUNDATIONAL (15) ---
-1. Keep root meaning. 2. Drop final vowel if any. 3. Add “sh” to start of slangified words.
-4. Reverse short words. 5. Insert “mb” for rhythm. 6. Repeat syllables in verbs.
-7. r ↔ l swap allowed. 8. Replace “s” with “z”. 9. ch → sh unless it ruins flow.
-10. Contract compounds. 11. Use numbers (e.g., 4 = for). 12. Rhythm over spelling.
-13. Create rhyme. 14. Shrink adjectives. 15. Idioms = new creations.
+II. INSERTION PLACEMENT:
+  * Insert at the **Phonetic Emphasis (PE)** point (stressed vowel).
+  * PE for French = always last vowel of the word.
 
---- VERBS (7) ---
-1. Verbs must bounce: add -eng, -ish, -o. 2. Double action verbs. 3. Reduplication = style.
-4. “ku-” → “sh-”. 5. Create suffixes: -ify, -olize. 6. Make up verbs if needed. 7. Match tense to vibe.
+III. STRUCTURE RULE:
+  * DO NOT add/remove letters.
+  * All original letters must be retained around inserted pattern.
 
---- NOUNS (8) ---
-1. Break down compounds. 2. Brutally shorten. 3. Swagify names (e.g., Nairobi → Nai-beng).
-4. “mb” replaces “m” or “b”. 5. Use sound-words. 6. Alienize names. 7. Fuse numbers. 8. Flip dull nouns.
+IV. MULTI-WORD INPUTS:
+  * Treat each word individually, unless part of compound.
 
---- PRONOUNS (5) ---
-1. “I” → “me” or “mi”. 2. “they” → “deyy”, “him” → “heem”. 3. No passive structure. 4. Use street form. 5. Subject always dominates.
+RESPONSE FORMAT:
+Explain clearly the PE used per word, then end with:
 
---- PREPOSITIONS / CONJUNCTIONS (5) ---
-1. “And” → “na”, “n”, “en”. 2. “With” → “shwi” or “whif”. 3. “Of” → drop or “o”. 4. Drop “a”/“the” if off-beat. 5. Fuse prepositions to verbs.
+Final Shembeteng Translation: **[translated string here]**
 
---- STYLISTIC (7) ---
-1. Slang > grammar. 2. Inspired by African languages. 3. Dirty > clean. 4. Use “z” for strength.
-5. Break rules for flow. 6. Repeat endings. 7. Rhyme > syntax.
-
---- CULTURAL (5) ---
-1. Nairobi slang is canon. 2. Blend Swahili, English, Sheng. 3. Tribe tones matter.
-4. Use rebellion slang. 5. Rap = grammar.
-
---- PHONETIC (4) ---
-1. Consonants > vowels. 2. Use glottal stops. 3. Drop soft ends. 4. Use tone markers.
-
---- CREATIVE (3) ---
-1. Break rules if doper. 2. If it sounds sick, it’s valid. 3. Every sentence should slap.
-
----
-
-Format like this per input:
-1. Explain PE placement per word
-2. Apply correct insertions
-3. Follow all rules above
-4. End clearly with:
-
-Final Shembeteng Translation: **[final translation]**
-
-Translate this:
+Translate this: 
 """
 
 def translate_shembeteng(text):
-    prompt = f"{shembeteng_prompt}\n{text}"
-    response = model.generate_content(prompt)
+    full_prompt = f"{shembeteng_prompt}\n{text}"
+    response = model.generate_content(full_prompt)
     return response.text
 
 @app.route('/')
